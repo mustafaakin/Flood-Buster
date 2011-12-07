@@ -1,6 +1,6 @@
-package flood;
+package com.mustafaakin.flood;
 
-import service.cache.SimpleCache;
+import com.mustafaakin.flood.cache.SimpleCache;
 
 /**
  *
@@ -10,6 +10,7 @@ public class Tester {
 
     /**
      * @param args the command line arguments
+     * @throws Exception  
      */
     public static void main(String[] args) throws Exception {
         test("mustafa-comment", 25, 1000, 5, 100);
@@ -27,7 +28,7 @@ public class Tester {
         RateLimitManager manage = new RateLimitManager();
         manage.setCache(new SimpleCache());
         for (int i = 0; i < count; i++) {
-            boolean b = manage.isAllowed(key, timeout, limit);
+            boolean b = manage.getAllowedActionCount(key, timeout, limit) > 0;
             long end = System.currentTimeMillis();
             System.out.print("@" + (end - start) + "\t\t");
             System.out.println(("#" + i + "\t\t") + (b ? "OK" : "NOT OK"));

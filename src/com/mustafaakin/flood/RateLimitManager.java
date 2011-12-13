@@ -1,7 +1,7 @@
 package com.mustafaakin.flood;
 
-import com.mustafaakin.flood.cache.AbstractCache;
 import java.util.Date;
+import play.cache.CacheImpl;
 
 /**
  *
@@ -9,7 +9,7 @@ import java.util.Date;
  */
 public class RateLimitManager {
 
-    private AbstractCache cache;
+    private CacheImpl cache;
     /**
      * If any error happens because of Cache mechanism, it will not cause a
      * crash, and instead return this CACHE_EXCEPTION value, which is unlikely
@@ -23,7 +23,7 @@ public class RateLimitManager {
     public RateLimitManager() {
     }
 
-    public RateLimitManager(AbstractCache cache) {
+    public RateLimitManager(CacheImpl cache) {
         this.setCache(cache);
     }
 
@@ -32,7 +32,7 @@ public class RateLimitManager {
      *
      * @param cache
      */
-    public void setCache(AbstractCache cache) {
+    public void setCache(CacheImpl cache) {
         this.cache = cache;
     }
 
@@ -67,11 +67,10 @@ public class RateLimitManager {
         if (cache == null) {
             throw new CacheNotSetException();
         }
-        try {
-            Action action = cache.get(actionKey, Action.class);
+        try {            
+            Action action = (Action)cache.get(actionKey);
             if (action == null) { // Action is not available in cache, needs initialization.
-                action = new Action(getTimeStamp(), actionLimit);
-                
+                action = new Action(getTimeStamp(), actionLimit);                
             } else {
                 long actionTime = action.getTimestamp();
                 long timeDifference = getTimeStamp() - actionTime; // How many milliseconds has passed before 
@@ -82,7 +81,7 @@ public class RateLimitManager {
                     action.updateRemaining();
                 }
             }
-            cache.set(actionKey, action); // Will eventually update cache with action, so it is set in the end.
+            cache.set(actionKey, action, timePeriod);
             return action.getRemaining();
         } catch (Exception e) {
             return CACHE_EXCEPTION;

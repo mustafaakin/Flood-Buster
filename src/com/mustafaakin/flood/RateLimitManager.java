@@ -1,6 +1,5 @@
 package com.mustafaakin.flood;
 
-import java.util.Date;
 import play.cache.CacheImpl;
 
 /**
@@ -10,17 +9,12 @@ import play.cache.CacheImpl;
 public class RateLimitManager {
 
     private CacheImpl cache;
-    /**
-     * If any error happens because of Cache mechanism, it will not cause a
-     * crash, and instead return this CACHE_EXCEPTION value, which is unlikely
-     * to be reached.
-     */
-    public final static int CACHE_EXCEPTION = Integer.MAX_VALUE;
 
     /**
      *
      */
     public RateLimitManager() {
+        this.setCache(new SimpleNotCompleteCache());
     }
 
     public RateLimitManager(CacheImpl cache) {
@@ -63,32 +57,16 @@ public class RateLimitManager {
      * implementation, It will not be possible to fetch any information so an
      * exception is thrown.
      */
-    public int getAllowedActionCount(String actionKey, int timePeriod, int actionLimit) throws CacheNotSetException {
-        if (cache == null) {
-            throw new CacheNotSetException();
+    public int getAllowedActionCount(String actionKey, int timePeriod, int actionLimit){
+        if ( cache == null)
+            throw new FloodBusterException("Cache is not set.");        
+        Action action = (Action) cache.get(actionKey);
+        if (action == null) { // Action is not available in cache, needs initialization.
+            action = new Action(actionLimit);
+        } else {
+            action.updateRemaining();
         }
-        try {            
-            Action action = (Action)cache.get(actionKey);
-            if (action == null) { // Action is not available in cache, needs initialization.
-                action = new Action(getTimeStamp(), actionLimit);                
-            } else {
-                long actionTime = action.getTimestamp();
-                long timeDifference = getTimeStamp() - actionTime; // How many milliseconds has passed before 
-
-                if (timeDifference > timePeriod) { // True if the action has expired, needs to be reset.
-                    action.reset(actionLimit, getTimeStamp());
-                } else {
-                    action.updateRemaining();
-                }
-            }
-            cache.set(actionKey, action, timePeriod);
-            return action.getRemaining();
-        } catch (Exception e) {
-            return CACHE_EXCEPTION;
-        }
-    }
-
-    private static long getTimeStamp() {
-        return (new Date()).getTime();
+        cache.set(actionKey, action, timePeriod);
+        return action.getRemaining();
     }
 }

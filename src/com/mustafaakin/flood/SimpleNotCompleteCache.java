@@ -1,8 +1,9 @@
-package com.mustafaakin.flood.cache;
+package com.mustafaakin.flood;
 
 import java.util.HashMap;
 import java.util.Map;
 import play.cache.CacheImpl;
+
 /**
  *
  * @author Mustafa
@@ -23,7 +24,13 @@ public class SimpleNotCompleteCache implements CacheImpl {
 
     @Override
     public void set(String string, Object o, int i) {
-        values.put(string, o);
+        ExpiringAction expAct;
+        if (values.containsKey(string)) {
+            expAct = (ExpiringAction) values.get(string);
+        } else {
+            expAct = new ExpiringAction((Action) o, System.currentTimeMillis(), i);
+        }
+        values.put(string, expAct);
     }
 
     @Override
@@ -43,7 +50,14 @@ public class SimpleNotCompleteCache implements CacheImpl {
 
     @Override
     public Object get(String string) {
-        return values.get(string);
+        ExpiringAction a = (ExpiringAction) values.get(string);
+        if (a == null) {
+            return null;
+        } else if (a.TTL + a.timeStamp < System.currentTimeMillis()) {
+            values.remove(string);
+            return null;
+        }
+        return a.action;
     }
 
     @Override
@@ -81,4 +95,20 @@ public class SimpleNotCompleteCache implements CacheImpl {
         throw new UnsupportedOperationException("Not needed.");
     }
 
+    class ExpiringAction {
+
+        private Action action;
+        private long timeStamp;
+        private int TTL;
+
+        public ExpiringAction(Action action, long timeStamp, int TTL) {
+            this.action = action;
+            this.timeStamp = timeStamp;
+            this.TTL = TTL;
+        }
+        
+        public String toString(){
+            return action + "/" + timeStamp + "/" + TTL;
+        }
+    }
 }

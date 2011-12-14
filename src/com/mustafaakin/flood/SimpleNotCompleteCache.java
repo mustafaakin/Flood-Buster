@@ -10,7 +10,7 @@ import play.cache.CacheImpl;
  */
 public class SimpleNotCompleteCache implements CacheImpl {
 
-    HashMap<String, Object> values = new HashMap<>();
+    HashMap<String, Object> values = new HashMap<String, Object>();
 
     @Override
     public void add(String string, Object o, int i) {

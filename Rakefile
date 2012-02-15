@@ -19,7 +19,7 @@ task :default => [:build]
 
 task :build => :compile do
   puts 'Packaging JAR...'  
-  sh "jar -cf orman.jar -C build ."
+  sh "jar -cf flood-buster.jar -C build ."
   sh "rm -rf build/"
   puts 'Done.'
 end

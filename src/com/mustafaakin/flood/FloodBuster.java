@@ -57,17 +57,21 @@ public class FloodBuster {
      * implementation, It will not be possible to fetch any information so an
      * exception is thrown.
      */
-    public long getAllowedActionCount(String actionKey, int timePeriod, int actionLimit) {
+    public int getAllowedActionCount(String actionKey, int timePeriod, int actionLimit) {
         if (cache == null) {
             throw new FloodBusterException("Cache is not set.");
         }
         try {
             Object remaining = cache.get(actionKey);
-            if (remaining == null) {
-                cache.set(actionKey, actionLimit, timePeriod);
-                return actionLimit;
+            if (remaining == null) { // Means expired or not even had
+                cache.set(actionKey, actionLimit - 1, timePeriod);
+                return actionLimit - 1;
+            } else {
+                int decremented = (Integer) remaining - 1;
+                cache.set(actionKey, decremented, timePeriod);
+                return decremented;
             }
-            return cache.decr(actionKey, 1);
+
         } catch (Exception ex) {
             return 1;
         }

@@ -28,7 +28,7 @@ public class SimpleNotCompleteCache implements CacheImpl {
         if (values.containsKey(string)) {
             expAct = (ExpiringAction) values.get(string);
         } else {
-            expAct = new ExpiringAction((Action) o, System.currentTimeMillis(), i);
+            expAct = new ExpiringAction((Integer)o, System.currentTimeMillis(), i);
         }
         values.put(string, expAct);
     }
@@ -57,7 +57,7 @@ public class SimpleNotCompleteCache implements CacheImpl {
             values.remove(string);
             return null;
         }
-        return a.action;
+        return a.count;
     }
 
     @Override
@@ -96,19 +96,14 @@ public class SimpleNotCompleteCache implements CacheImpl {
     }
 
     class ExpiringAction {
-
-        private Action action;
+        private int count;
         private long timeStamp;
         private int TTL;
 
-        public ExpiringAction(Action action, long timeStamp, int TTL) {
-            this.action = action;
+        public ExpiringAction(int count, long timeStamp, int TTL) {
+            this.count = count;
             this.timeStamp = timeStamp;
             this.TTL = TTL;
-        }
-        
-        public String toString(){
-            return action + "/" + timeStamp + "/" + TTL;
         }
     }
 }

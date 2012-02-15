@@ -6,18 +6,18 @@ import play.cache.CacheImpl;
  *
  * @author Mustafa
  */
-public class RateLimitManager {
+public class FloodBuster {
 
     private CacheImpl cache;
 
     /**
      *
      */
-    public RateLimitManager() {
+    public FloodBuster() {
         this.setCache(new SimpleNotCompleteCache());
     }
 
-    public RateLimitManager(CacheImpl cache) {
+    public FloodBuster(CacheImpl cache) {
         this.setCache(cache);
     }
 
@@ -57,16 +57,18 @@ public class RateLimitManager {
      * implementation, It will not be possible to fetch any information so an
      * exception is thrown.
      */
-    public int getAllowedActionCount(String actionKey, int timePeriod, int actionLimit){
-        if ( cache == null)
-            throw new FloodBusterException("Cache is not set.");        
-        Action action = (Action) cache.get(actionKey);
-        if (action == null) { // Action is not available in cache, needs initialization.
-            action = new Action(actionLimit);
-        } else {
-            action.updateRemaining();
+    public long getAllowedActionCount(String actionKey, int timePeriod, int actionLimit) {
+        if (cache == null) {
+            throw new FloodBusterException("Cache is not set.");
         }
-        cache.set(actionKey, action, timePeriod);
-        return action.getRemaining();
+        try {
+            Object remaining = cache.get(actionKey);
+            if (remaining == null) {
+                cache.set(actionKey, actionLimit, timePeriod);
+            }
+            return cache.decr(actionKey, 1);
+        } catch (Exception ex) {
+            return 1;
+        }
     }
 }

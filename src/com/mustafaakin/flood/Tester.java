@@ -64,7 +64,7 @@ public class Tester {
         } else {
             System.out.println("Starting Test..");
         }
-        RateLimitManager manage = new RateLimitManager();
+        FloodBuster manage = new FloodBuster();
         manage.setCache(new SimpleNotCompleteCache());
         for (int i = 0; i < count; i++) {
             results[i] = manage.getAllowedActionCount(key, timeout, limit) > 0;

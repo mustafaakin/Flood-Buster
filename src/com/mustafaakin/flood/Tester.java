@@ -28,9 +28,9 @@ public class Tester {
         expected[2][24] = true;
 
         boolean[][] tests = new boolean[3][25];
-        tests[0] = test("mustafa-comment", 25, 1000, 5, 64, false);
-        tests[1] = test("mustafa-comment", 25, 1000, 5, 256, false);
-        tests[2] = test("mustafa-comment", 25, 1000, 2, 128, false);
+        tests[0] = test("mustafa-comment", 25, 1000, 5, 64, true);
+        tests[1] = test("mustafa-comment", 25, 1000, 5, 256, true);
+        tests[2] = test("mustafa-comment", 25, 1000, 2, 128, true);
 
         System.out.println("RESULTS:");
         for (int i = 0; i < 3; i++) {

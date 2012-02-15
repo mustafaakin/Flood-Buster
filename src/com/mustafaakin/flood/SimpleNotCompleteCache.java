@@ -57,7 +57,7 @@ public class SimpleNotCompleteCache implements CacheImpl {
             values.remove(string);
             return null;
         }
-        return a.count;
+        return a;
     }
 
     @Override
@@ -72,7 +72,10 @@ public class SimpleNotCompleteCache implements CacheImpl {
 
     @Override
     public long decr(String string, int i) {
-        throw new UnsupportedOperationException("Not needed.");
+        ExpiringAction ea = (ExpiringAction)this.get(string);
+        ea.count -= i;
+        values.put(string, ea);
+        return ea.count;
     }
 
     @Override

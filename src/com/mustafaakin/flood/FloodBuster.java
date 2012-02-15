@@ -65,6 +65,7 @@ public class FloodBuster {
             Object remaining = cache.get(actionKey);
             if (remaining == null) {
                 cache.set(actionKey, actionLimit, timePeriod);
+                return actionLimit;
             }
             return cache.decr(actionKey, 1);
         } catch (Exception ex) {
